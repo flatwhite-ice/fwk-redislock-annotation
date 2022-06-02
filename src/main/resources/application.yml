@@ -1,0 +1,9 @@
+#redis:
+#  cluster:
+#    nodes:
+#      - redis://127.0.0.1:6379
+#      - redis://127.0.0.1:6389
+redis:
+  mode: single
+  nodes:
+    - "redis://127.0.0.1:6379"
