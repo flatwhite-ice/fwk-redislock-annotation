@@ -1,8 +1,9 @@
 package com.example.threadlock.account;
 
+
+import com.example.threadlock.infrastructure.redis.Control;
 import com.example.threadlock.infrastructure.redis.Lock;
 import com.example.threadlock.infrastructure.redis.RedisLock;
-import com.example.threadlock.infrastructure.redis.Type;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +17,9 @@ public class AccountDepositService {
         this.accountRepository = accountRepository;
     }
 
-    @RedisLock(type = Lock.KEY, value = "account", action = Type.AS_FAR_AS_POSSIBLE, waittime = 30000L, leasetime = 30000L)
+    @RedisLock(keytype = Control.KEY, key = "account", locktype = Lock.TRYLOCK_WAITTIME_LEASETIME, waittime = 30000L, leasetime = 30000L)
+    //@RedisLock(keytype = Control.KEY, key = "account", locktype = Lock.TRYLOCK, timeout = 5000L)
+    //@RedisLock(keytype = Control.KEY, key = "account", locktype = Lock.INTERRUPTIBLY)
     public AccountResponseDto deposit(String account, Long amount){
 
         AccountResponseDto response = new AccountResponseDto();
