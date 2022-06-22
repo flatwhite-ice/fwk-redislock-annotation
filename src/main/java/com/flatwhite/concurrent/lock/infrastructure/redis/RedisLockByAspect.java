@@ -52,7 +52,7 @@ public final class RedisLockByAspect {
 
         RLock lock       = redissonClient.getLock(lockKey);
         boolean isLocked = false;
-        Object finished   = null;
+        Object finished  = null;
 
         if(log.isDebugEnabled()){
             log.debug("redisLock [thread : {}][key : {}] started at : {}", Thread.currentThread().getId(), lockKey, LocalDateTime.now());
@@ -198,7 +198,10 @@ public final class RedisLockByAspect {
      */
     private Object proceedTryLockWaittimeLeaseTime(Long waitTime, Long leaseTime, String lockKey, RLock lock, ProceedingJoinPoint joinPoint) throws InterruptedException {
 
-        log.info(">>proceed attempt till unlock, waitTime : {}, leaseTime : {}", waitTime, leaseTime);
+        if(log.isInfoEnabled()){
+            log.info(">>proceed attempt till unlock, waitTime : {}, leaseTime : {}", waitTime, leaseTime);
+        }
+
 
         boolean isLocked = lock.tryLock(waitTime, leaseTime, TimeUnit.MILLISECONDS);
         if(!isLocked){
@@ -208,7 +211,10 @@ public final class RedisLockByAspect {
 
         Object finished = null;
         try{
-            log.debug("lock acquired at : {}", LocalDateTime.now());
+            if(log.isDebugEnabled()){
+                log.debug("lock acquired at : {}", LocalDateTime.now());
+            }
+
             finished = joinPoint.proceed();
 
         } catch (RedisLockException rle) {
@@ -242,13 +248,18 @@ public final class RedisLockByAspect {
      */
     private Object proceedLockInterruptibly(Long leaseTime, String lockKey, RLock lock, ProceedingJoinPoint joinPoint) throws InterruptedException{
 
-        log.info(">>proceed lockInterruptibly, leaseTime : {}",  leaseTime);
+        if(log.isInfoEnabled()){
+            log.info(">>proceed lockInterruptibly, leaseTime : {}",  leaseTime);
+        }
 
         lock.lockInterruptibly(leaseTime, TimeUnit.MILLISECONDS);
         Object finished = null;
 
         try{
-            log.debug("lock acquired at : {}", LocalDateTime.now());
+            if(log.isDebugEnabled()){
+                log.debug("lock acquired at : {}", LocalDateTime.now());
+            }
+
             finished = joinPoint.proceed();
 
         } catch (RedisLockException rle) {
