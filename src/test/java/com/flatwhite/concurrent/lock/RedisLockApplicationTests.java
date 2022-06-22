@@ -1,10 +1,10 @@
-package com.example.threadlock;
+package com.flatwhite.concurrent.lock;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class ThreadLockApplicationTests {
+class RedisLockApplicationTests {
 
     @Test
     void contextLoads() {

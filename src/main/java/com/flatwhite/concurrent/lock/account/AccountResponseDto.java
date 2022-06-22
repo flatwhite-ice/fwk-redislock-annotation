@@ -1,4 +1,4 @@
-package com.example.threadlock.account;
+package com.flatwhite.concurrent.lock.account;
 
 import lombok.Data;
 

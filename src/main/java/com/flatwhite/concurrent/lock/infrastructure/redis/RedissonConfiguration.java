@@ -1,4 +1,4 @@
-package com.example.threadlock.infrastructure.redis;
+package com.flatwhite.concurrent.lock.infrastructure.redis;
 
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;

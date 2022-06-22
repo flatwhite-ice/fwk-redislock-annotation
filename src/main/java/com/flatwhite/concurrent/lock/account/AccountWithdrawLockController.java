@@ -1,8 +1,8 @@
-package com.example.threadlock.account;
+package com.flatwhite.concurrent.lock.account;
 
-import com.example.threadlock.infrastructure.redis.Control;
-import com.example.threadlock.infrastructure.redis.Lock;
-import com.example.threadlock.infrastructure.redis.RedisLock;
+import com.flatwhite.concurrent.lock.infrastructure.redis.Control;
+import com.flatwhite.concurrent.lock.infrastructure.redis.Lock;
+import com.flatwhite.concurrent.lock.infrastructure.redis.RedisLock;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
