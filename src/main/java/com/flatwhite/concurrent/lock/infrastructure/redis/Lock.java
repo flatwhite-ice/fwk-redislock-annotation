@@ -1,4 +1,4 @@
-package com.example.threadlock.infrastructure.redis;
+package com.flatwhite.concurrent.lock.infrastructure.redis;
 
 public enum Lock{
     //try to acquire lock, wait until wait_time, and unlock after lease_time

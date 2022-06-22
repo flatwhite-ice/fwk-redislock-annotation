@@ -1,8 +1,4 @@
-package com.example.threadlock.infrastructure.redis;
-
-import org.springframework.core.annotation.AliasFor;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+package com.flatwhite.concurrent.lock.infrastructure.redis;
 
 import java.lang.annotation.*;
 

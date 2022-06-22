@@ -1,4 +1,4 @@
-package com.example.threadlock.infrastructure.redis;
+package com.flatwhite.concurrent.lock.infrastructure.redis;
 
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -16,9 +16,6 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-import static com.example.threadlock.infrastructure.redis.Control.KEY;
-import static com.example.threadlock.infrastructure.redis.Control.PATH_VARIABLE;
-
 @Aspect
 @Slf4j
 @Component
@@ -30,7 +27,7 @@ public final class RedisLockByAspect {
         this.redissonClient = redissonClient;
     }
 
-    @Pointcut("@annotation(RedisLock)")
+    @Pointcut("@annotation(com.flatwhite.concurrent.lock.infrastructure.redis.RedisLock)")
     public void redisLock(){}
 
     @Around("redisLock()")

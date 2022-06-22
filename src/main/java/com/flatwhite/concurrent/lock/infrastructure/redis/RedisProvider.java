@@ -1,4 +1,4 @@
-package com.example.threadlock.infrastructure.redis;
+package com.flatwhite.concurrent.lock.infrastructure.redis;
 
 
 import lombok.extern.slf4j.Slf4j;

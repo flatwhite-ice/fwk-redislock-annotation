@@ -1,4 +1,4 @@
-package com.example.threadlock.infrastructure.redis;
+package com.flatwhite.concurrent.lock.infrastructure.redis;
 
 public enum Control {
     //Domain Layer, You can set the Key from Domain Logic
