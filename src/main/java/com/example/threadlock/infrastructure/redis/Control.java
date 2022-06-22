@@ -4,5 +4,8 @@ public enum Control {
     //Domain Layer, You can set the Key from Domain Logic
     KEY,
     //Controller Layer, You can set the Key from PathVariable
-    PATH_VARIABLE
+    PATH_VARIABLE,
+
+    //Everywhere, You can set the Key manually
+    MANUAL,
 }

@@ -50,7 +50,7 @@ public final class RedisLockByAspect {
 
 
         if(log.isDebugEnabled()){
-            log.debug("redisLock key is : {}", lockKey);
+            log.debug("redisLock key is [{}]", lockKey);
         }
 
         RLock lock       = redissonClient.getLock(lockKey);
@@ -58,29 +58,29 @@ public final class RedisLockByAspect {
         Object finished   = null;
 
         if(log.isDebugEnabled()){
-            log.debug("[thread : {}] rlock[{}] started at : {}", Thread.currentThread().getId(), lockKey, LocalDateTime.now());
+            log.debug("redisLock [thread : {}][key : {}] started at : {}", Thread.currentThread().getId(), lockKey, LocalDateTime.now());
         }
 
+
+        if(log.isDebugEnabled()){
+            log.debug("redisLock locktype is [{}]", redisLock.locktype().name());
+        }
 
         switch(redisLock.locktype()) {
 
             case DEFAULT:
-                log.debug("lock type is default");
                 finished = this.proceedDefault(lockKey, lock, joinPoint);
                 break;
 
             case INTERRUPTIBLY:
-                log.debug("lock type is interruptibly");
                 finished = this.proceedLockInterruptibly(leaseTime, lockKey, lock, joinPoint);
                 break;
 
             case TRYLOCK:
-                log.debug("lock type is tryLock");
                 finished = this.proceedTryLockTimeout(timeout, lockKey, lock, joinPoint);
                 break;
 
             case TRYLOCK_WAITTIME_LEASETIME:
-                log.debug("lock type is trylock waittime and lease time");
                 if(waitTime <= 0 || leaseTime <= 0){
                     throw new RedisLockException("waittime or leasetime not found exception.");
                 }
@@ -99,7 +99,7 @@ public final class RedisLockByAspect {
 
 
     /**
-     * Request시 Lock을 획득하고, 동일한 Key로 Lock을 획득 시도하였으나, 획득에 실패한 경우 exception을 발생시킨다.
+     * Request시 주어진 Key로 Lock을 획득한다. 동일한 Key로 Lock을 시도하였으나, 획득에 실패한 경우 exception을 발생시킨다.
      * completed
      * @param lockKey
      * @param lock
@@ -108,7 +108,9 @@ public final class RedisLockByAspect {
      */
     private Object proceedDefault(String lockKey, RLock lock, ProceedingJoinPoint joinPoint){
 
-        log.info(">>proceed default");
+        //if(log.isDebugEnabled()){
+        //    log.debug(">> proceed default");
+        //}
 
         boolean isLocked = lock.tryLock();
         Object finished   = null;
@@ -132,7 +134,7 @@ public final class RedisLockByAspect {
             }
 
             if(log.isDebugEnabled()){
-                log.debug("[thread : {}] rlock[{}] ended at : {}", Thread.currentThread().getId(), lockKey, LocalDateTime.now());
+                log.debug("redisLock [thread : {}][key : {}] ended at : {}", Thread.currentThread().getId(), lockKey, LocalDateTime.now());
             }
 
         }
@@ -144,7 +146,7 @@ public final class RedisLockByAspect {
 
     /**
      * RedisLock에 Timeout을 걸어준다.
-     * Timeout내에 request가 종료되지 못하면 Lock을 획득하지 못하고 실패처리된다.
+     * Timeout내에 request가 처리되지 못하면 Lock을 획득하지 못하고 실패처리 되며, Exception을 발생시킨다.
      * @param timeout
      * @param lockKey
      * @param lock
@@ -154,18 +156,24 @@ public final class RedisLockByAspect {
      */
     private Object proceedTryLockTimeout(Long timeout, String lockKey, RLock lock, ProceedingJoinPoint joinPoint) throws InterruptedException {
 
-        log.info(">>proceed trylock timeout");
+        if(log.isDebugEnabled()){
+            log.debug(">>proceed trylock timeout");
+        }
+
         boolean isLocked = lock.tryLock(timeout, TimeUnit.MILLISECONDS);
         if(!isLocked){
             String message = "(" + lockKey  + ") is locked by another request[" + Thread.currentThread().getId() +"]";
             throw new RedisLockException(message);
         }
-        log.debug("proceedTimeout isLocked : {}", isLocked);
+
+        if(log.isDebugEnabled()){
+            log.debug("proceedTimeout isLocked : {}", isLocked);
+        }
+
+
         Object finished = null;
         try{
-            log.debug("[thread : {}] rlock[{}] request started at : {}", Thread.currentThread().getId(), lockKey, LocalDateTime.now());
             finished = joinPoint.proceed();
-            log.debug("[thread : {}] rlock[{}] request finished at : {}", Thread.currentThread().getId(), lockKey, LocalDateTime.now());
         }catch(Throwable e){
             e.printStackTrace();
         }finally{
@@ -174,7 +182,7 @@ public final class RedisLockByAspect {
             }
 
             if(log.isDebugEnabled()){
-                log.debug("[thread : {}] rlock[{}] ended at : {}", Thread.currentThread().getId(), lockKey, LocalDateTime.now());
+                log.debug("redisLock [thread : {}][key : {}] ended at : {}", Thread.currentThread().getId(), lockKey, LocalDateTime.now());
             }
         }
 
@@ -184,7 +192,7 @@ public final class RedisLockByAspect {
 
     /**
      * locktype = Lock.TRYLOCK_WAITTIME_LEASETIME
-     * unlock될때까지 aquition기간동안은 lock을 획득하기위해 대기한다.
+     * unlock될때까지 acquition기간동안은 lock을 획득하기 위해 대기한다.
      *
      * @param lockKey
      * @param lock
@@ -217,7 +225,7 @@ public final class RedisLockByAspect {
             }
 
             if(log.isDebugEnabled()){
-                log.debug("[thread : {}] rlock[{}] ended at : {}", Thread.currentThread().getId(), lockKey, LocalDateTime.now());
+                log.debug("redisLock [thread : {}][key : {}] ended at : {}", Thread.currentThread().getId(), lockKey, LocalDateTime.now());
             }
 
         }
@@ -228,7 +236,7 @@ public final class RedisLockByAspect {
 
     /**
      * locktype = Lock.INTERRUPTIBLY
-     * lock을 획득하기위해 대기한다.
+     * lock을 획득하기 위해 대기한다. leasetime이 되면 lock을 해제한다.
      *
      * @param leaseTime
      * @param lockKey
@@ -256,7 +264,7 @@ public final class RedisLockByAspect {
                 lock.unlock();
             }
             if(log.isDebugEnabled()){
-                log.debug("[thread : {}] rlock[{}] ended at : {}", Thread.currentThread().getId(), lockKey, LocalDateTime.now());
+                log.debug("redisLock [thread : {}][key : {}] ended at : {}", Thread.currentThread().getId(), lockKey, LocalDateTime.now());
             }
         }
 
@@ -267,7 +275,7 @@ public final class RedisLockByAspect {
 
     /**
      * locktype = Lock.INTERRUPTIBLY
-     * leaseTime이 주어지지않을경우 default leaseTime으로 수행한다.
+     * leaseTime이 주어지지 않을 경우 default leaseTime으로 수행한다.
      * default leaseTime : -1L
      * @param lockKey
      * @param lock
@@ -292,7 +300,10 @@ public final class RedisLockByAspect {
         String lockKey = null;
         Optional<String> first;
 
-        log.debug("redisLock type is {}", redisLock.keytype().name());
+        if(log.isInfoEnabled()){
+            log.info("redisLock keytype is [{}]", redisLock.keytype().name());
+        }
+
         switch(redisLock.keytype()){
 
             case KEY:
@@ -339,6 +350,10 @@ public final class RedisLockByAspect {
 
                 lockKey = first.get();
                 break;
+
+            case MANUAL:
+                //Set Key Manually
+                lockKey = redisLock.key();
 
         }
 
