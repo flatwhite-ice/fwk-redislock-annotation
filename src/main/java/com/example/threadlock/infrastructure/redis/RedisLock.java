@@ -11,20 +11,19 @@ import java.lang.annotation.*;
 @Documented
 public @interface RedisLock {
 
-    Lock type() default Lock.KEY;
+    Control keytype() default Control.KEY;
 
-    String value() default "";
+    String key() default "";
 
     long timeout() default DEFAULT_TIMEOUT;
 
-    Type action() default Type.TRY_FIRST;
+    Lock locktype() default Lock.DEFAULT;
 
     long waittime() default 0;
 
     long leasetime() default 0;
 
-    public static long DEFAULT_TIMEOUT    = -1L;
-    public static long DEFAULT_ACQUISITION = -1L;
+    public static long DEFAULT_TIMEOUT     = -1L;
 
 }
 
