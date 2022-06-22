@@ -114,6 +114,7 @@ public final class RedisLockByAspect {
         try{
 
             if(!isLocked){
+                //TODO "another request information get from redis"
                 String message = "(" + lockKey  + ") is locked by another request[" + Thread.currentThread().getId() +"]";
                 throw new RedisLockException(message);
             }
@@ -189,7 +190,8 @@ public final class RedisLockByAspect {
 
     /**
      * locktype = Lock.TRYLOCK_WAITTIME_LEASETIME
-     * unlock될때까지 acquition기간동안은 lock을 획득하기 위해 대기한다.
+     * WAITTIME 동안 lock을 획득하기위해 대기한다.
+     * LEASETIME 이 경과할 경우 lock을 해제한다.
      *
      * @param lockKey
      * @param lock
@@ -239,7 +241,7 @@ public final class RedisLockByAspect {
 
     /**
      * locktype = Lock.INTERRUPTIBLY
-     * lock을 획득하기 위해 대기한다. leasetime이 되면 lock을 해제한다.
+     * lock을 획득할때까지 대기한다. leasetime이 되면 lock을 해제한다.
      *
      * @param leaseTime
      * @param lockKey
