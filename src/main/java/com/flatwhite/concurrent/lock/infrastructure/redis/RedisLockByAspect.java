@@ -177,7 +177,7 @@ public final class RedisLockByAspect {
         //}
 
         boolean isLocked = lock.tryLock();
-        Object finished   = null;
+        Object finished  = null;
         try{
 
             if(!isLocked){
