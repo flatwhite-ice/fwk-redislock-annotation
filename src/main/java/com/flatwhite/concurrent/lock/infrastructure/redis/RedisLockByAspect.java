@@ -33,8 +33,8 @@ public final class RedisLockByAspect {
     @Around("redisLock()")
     public Object getLock(ProceedingJoinPoint joinPoint) throws Throwable {
 
-        MethodSignature signature = (MethodSignature)joinPoint.getSignature();
         Object[] joinPointArgs    = joinPoint.getArgs();
+        MethodSignature signature = (MethodSignature)joinPoint.getSignature();
         Method method             = signature.getMethod();
         Parameter[] parameters    = method.getParameters();
         RedisLock redisLock       = method.getAnnotation(RedisLock.class);
@@ -45,18 +45,14 @@ public final class RedisLockByAspect {
         Long waitTime   = redisLock.waittime();
         Long leaseTime  = redisLock.leasetime();
 
-
-        if(log.isDebugEnabled()){
-            log.debug("redisLock key is [{}]", lockKey);
-        }
-
         RLock lock       = redissonClient.getLock(lockKey);
         boolean isLocked = false;
         Object finished  = null;
 
         if(log.isDebugEnabled()){
-            log.debug("redisLock [thread : {}][key : {}] started at : {}", Thread.currentThread().getId(), lockKey, LocalDateTime.now());
+            log.debug("redisLock key is [{}]", lockKey);
             log.debug("redisLock locktype is [{}]", locktype.name());
+            log.debug("redisLock [thread : {}][key : {}] started at : {}", Thread.currentThread().getId(), lockKey, LocalDateTime.now());
         }
 
         switch(locktype) {
@@ -89,6 +85,81 @@ public final class RedisLockByAspect {
         return finished;
 
     }
+
+
+    /**
+     * 어노테이션으로부터 Lock Key를 획득한다.
+     * @param redisLock
+     * @param parameters
+     * @param joinPointArgs
+     * @return
+     */
+    private String lockKey(RedisLock redisLock, Parameter[] parameters, Object[] joinPointArgs){
+
+        String lockKey = null;
+        Optional<String> first;
+
+        if(log.isDebugEnabled()){
+            log.debug("redisLock keytype is [{}]", redisLock.keytype().name());
+        }
+
+        switch(redisLock.keytype()){
+
+            case KEY:
+                //Domain Layer (from Parameter)
+                first = Arrays.stream(parameters)
+                        .filter(p -> p.getName().equals(redisLock.key()))
+                        .map  (p -> {
+                            String value = "";
+                            for(int i = 0; i < joinPointArgs.length; i++){
+                                if(parameters[i].getName().equals((p.getName()))){
+                                    value = joinPointArgs[i].toString();
+                                    break;
+                                }
+                            }
+                            return value;
+                        })
+                        .findFirst();
+                lockKey = first.get();
+                break;
+
+            case PATH_VARIABLE:
+                //Controller Layer
+                first = Arrays.stream(parameters)
+                        .filter(p -> p.getDeclaredAnnotation(PathVariable.class) != null)
+                        .filter(p -> p.getName().equals(redisLock.key()))
+                        .map  (p -> {
+                            String value = "";
+                            //if(log.isDebugEnabled()){
+                            //    log.debug("p.getName : {}", p.getName());
+                            //}
+                            for(int i = 0; i < joinPointArgs.length; i++){
+                                //if(log.isDebugEnabled()){
+                                //    log.debug("joinPoint.getArgs[{}] : {}", i, joinPoint.getArgs()[i]);
+                                //    log.debug("method.getParameters()[{}].getName() : {}", i,  method.getParameters()[i].getName());
+                                //}
+                                if(parameters[i].getName().equals(p.getName())){
+                                    value = joinPointArgs[i].toString();
+                                    break;
+                                }
+                            }
+                            return value;
+                        })
+                        .findFirst();
+
+                lockKey = first.get();
+                break;
+
+            case MANUAL:
+                //Set Key Manually
+                lockKey = redisLock.key();
+
+        }
+
+        return lockKey;
+    }
+
+
 
 
     /**
@@ -294,76 +365,6 @@ public final class RedisLockByAspect {
     }
 
 
-    /**
-     * 어노테이션으로부터 Lock Key를 획득한다.
-     * @param redisLock
-     * @param parameters
-     * @param joinPointArgs
-     * @return
-     */
-    private String lockKey(RedisLock redisLock, Parameter[] parameters, Object[] joinPointArgs){
 
-        String lockKey = null;
-        Optional<String> first;
-
-        if(log.isDebugEnabled()){
-            log.debug("redisLock keytype is [{}]", redisLock.keytype().name());
-        }
-
-        switch(redisLock.keytype()){
-
-            case KEY:
-                //Domain Layer (from Parameter)
-                first = Arrays.stream(parameters)
-                        .filter(p -> p.getName().equals(redisLock.key()))
-                        .map  (p -> {
-                            String value = "";
-                            for(int i = 0; i < joinPointArgs.length; i++){
-                                if(parameters[i].getName().equals((p.getName()))){
-                                    value = joinPointArgs[i].toString();
-                                    break;
-                                }
-                            }
-                            return value;
-                        })
-                        .findFirst();
-                lockKey = first.get();
-                break;
-
-            case PATH_VARIABLE:
-                //Controller Layer
-                first = Arrays.stream(parameters)
-                        .filter(p -> p.getDeclaredAnnotation(PathVariable.class) != null)
-                        .filter(p -> p.getName().equals(redisLock.key()))
-                        .map  (p -> {
-                            String value = "";
-                            //if(log.isDebugEnabled()){
-                            //    log.debug("p.getName : {}", p.getName());
-                            //}
-                            for(int i = 0; i < joinPointArgs.length; i++){
-                                //if(log.isDebugEnabled()){
-                                //    log.debug("joinPoint.getArgs[{}] : {}", i, joinPoint.getArgs()[i]);
-                                //    log.debug("method.getParameters()[{}].getName() : {}", i,  method.getParameters()[i].getName());
-                                //}
-                                if(parameters[i].getName().equals(p.getName())){
-                                    value = joinPointArgs[i].toString();
-                                    break;
-                                }
-                            }
-                            return value;
-                        })
-                        .findFirst();
-
-                lockKey = first.get();
-                break;
-
-            case MANUAL:
-                //Set Key Manually
-                lockKey = redisLock.key();
-
-        }
-
-        return lockKey;
-    }
 
 }
