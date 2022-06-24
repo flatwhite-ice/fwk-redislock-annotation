@@ -182,7 +182,7 @@ public final class RedisLockByAspect {
 
             if(!isLocked){
                 //TODO "another request information get from redis"
-                String message = "(" + lockKey  + ") is locked by another request";
+                String message = "proceedDefault exception occured. because (" + lockKey  + ") is locked by another request";
                 throw new RedisLockException(message);
             }
 
@@ -227,7 +227,7 @@ public final class RedisLockByAspect {
 
         boolean isLocked = lock.tryLock(timeout, TimeUnit.MILLISECONDS);
         if(!isLocked){
-            String message = "(" + lockKey  + ") is locked by another request";
+            String message = "trylock timeout because (" + lockKey  + ") is locked by another request";
             throw new RedisLockException(message);
         }
 

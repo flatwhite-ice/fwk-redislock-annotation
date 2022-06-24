@@ -24,6 +24,7 @@ public class AccountWithdrawLockController{
     //@RedisLock(keytype = Control.PATH_VARIABLE, key = "account",  locktype = Lock.TRYLOCK_WAITTIME_LEASETIME, waittime = 30000L, leasetime = 30000L)
     //@RedisLock(keytype = Control.KEY, key = "account", locktype = Lock.TRYLOCK, timeout = 5000L)
     @RedisLock(keytype = Control.KEY, key = "account", locktype = Lock.INTERRUPTIBLY)
+    //@RedisLock(keytype = Control.KEY, key = "account", locktype = Lock.DEFAULT)
     @GetMapping("/locked/{account}/withdraw/{amount}")
     public AccountResponseDto withdraw(@PathVariable String account, @PathVariable String amount) {
 
