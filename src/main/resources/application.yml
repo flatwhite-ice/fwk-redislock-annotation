@@ -1,3 +1,4 @@
+
 #redis:
 #  cluster:
 #    nodes:
@@ -7,3 +8,6 @@ redis:
   mode: single
   nodes:
     - "redis://127.0.0.1:6379"
+
+server:
+  port: 8080

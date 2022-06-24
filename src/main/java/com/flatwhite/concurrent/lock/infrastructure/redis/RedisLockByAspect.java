@@ -39,11 +39,11 @@ public final class RedisLockByAspect {
         Parameter[] parameters    = method.getParameters();
         RedisLock redisLock       = method.getAnnotation(RedisLock.class);
 
-        String lockKey   = this.lockKey(redisLock, parameters, joinPointArgs);
-        Long timeout     = redisLock.timeout();
-        Lock actionType  = redisLock.locktype();
-        Long waitTime    = redisLock.waittime();
-        Long leaseTime   = redisLock.leasetime();
+        String lockKey  = this.lockKey(redisLock, parameters, joinPointArgs);
+        Long timeout    = redisLock.timeout();
+        Lock locktype   = redisLock.locktype();
+        Long waitTime   = redisLock.waittime();
+        Long leaseTime  = redisLock.leasetime();
 
 
         if(log.isDebugEnabled()){
@@ -56,14 +56,10 @@ public final class RedisLockByAspect {
 
         if(log.isDebugEnabled()){
             log.debug("redisLock [thread : {}][key : {}] started at : {}", Thread.currentThread().getId(), lockKey, LocalDateTime.now());
+            log.debug("redisLock locktype is [{}]", locktype.name());
         }
 
-
-        if(log.isDebugEnabled()){
-            log.debug("redisLock locktype is [{}]", redisLock.locktype().name());
-        }
-
-        switch(redisLock.locktype()) {
+        switch(locktype) {
 
             case DEFAULT:
                 finished = this.proceedDefault(lockKey, lock, joinPoint);
@@ -115,7 +111,7 @@ public final class RedisLockByAspect {
 
             if(!isLocked){
                 //TODO "another request information get from redis"
-                String message = "(" + lockKey  + ") is locked by another request[" + Thread.currentThread().getId() +"]";
+                String message = "(" + lockKey  + ") is locked by another request";
                 throw new RedisLockException(message);
             }
 
@@ -160,7 +156,7 @@ public final class RedisLockByAspect {
 
         boolean isLocked = lock.tryLock(timeout, TimeUnit.MILLISECONDS);
         if(!isLocked){
-            String message = "(" + lockKey  + ") is locked by another request[" + Thread.currentThread().getId() +"]";
+            String message = "(" + lockKey  + ") is locked by another request";
             throw new RedisLockException(message);
         }
 
@@ -200,21 +196,21 @@ public final class RedisLockByAspect {
      */
     private Object proceedTryLockWaittimeLeaseTime(Long waitTime, Long leaseTime, String lockKey, RLock lock, ProceedingJoinPoint joinPoint) throws InterruptedException {
 
-        if(log.isInfoEnabled()){
-            log.info(">>proceed attempt till unlock, waitTime : {}, leaseTime : {}", waitTime, leaseTime);
+        if(log.isDebugEnabled()){
+            log.debug(">>proceed attempt till unlock, waitTime : {}, leaseTime : {}", waitTime, leaseTime);
         }
 
 
         boolean isLocked = lock.tryLock(waitTime, leaseTime, TimeUnit.MILLISECONDS);
         if(!isLocked){
-            String message = "(" + lockKey  + ") is locked by another request[" + Thread.currentThread().getId() +"]";
+            String message = "(" + lockKey  + ") is locked by another request";
             throw new RedisLockException(message);
         }
 
         Object finished = null;
         try{
             if(log.isDebugEnabled()){
-                log.debug("lock acquired at : {}", LocalDateTime.now());
+                log.debug("redisLock [thread : {}] lock acquired at : {}", Thread.currentThread().getId(), LocalDateTime.now());
             }
 
             finished = joinPoint.proceed();
@@ -250,8 +246,8 @@ public final class RedisLockByAspect {
      */
     private Object proceedLockInterruptibly(Long leaseTime, String lockKey, RLock lock, ProceedingJoinPoint joinPoint) throws InterruptedException{
 
-        if(log.isInfoEnabled()){
-            log.info(">>proceed lockInterruptibly, leaseTime : {}",  leaseTime);
+        if(log.isDebugEnabled()){
+            log.debug(">>proceed lockInterruptibly, leaseTime : {}",  leaseTime);
         }
 
         lock.lockInterruptibly(leaseTime, TimeUnit.MILLISECONDS);
@@ -259,7 +255,7 @@ public final class RedisLockByAspect {
 
         try{
             if(log.isDebugEnabled()){
-                log.debug("lock acquired at : {}", LocalDateTime.now());
+                log.debug("redisLock [thread : {}] lock acquired at : {}", Thread.currentThread().getId(), LocalDateTime.now());
             }
 
             finished = joinPoint.proceed();
@@ -294,7 +290,7 @@ public final class RedisLockByAspect {
      * @throws InterruptedException
      */
     private Object proceedLockInterruptibly(String lockKey, RLock lock, ProceedingJoinPoint joinPoint) throws  InterruptedException{
-        return this.proceedLockInterruptibly(-1L, lockKey, lock, joinPoint);
+        return this.proceedLockInterruptibly(RedisLock.DEFAULT_LEASETIME, lockKey, lock, joinPoint);
     }
 
 
@@ -310,8 +306,8 @@ public final class RedisLockByAspect {
         String lockKey = null;
         Optional<String> first;
 
-        if(log.isInfoEnabled()){
-            log.info("redisLock keytype is [{}]", redisLock.keytype().name());
+        if(log.isDebugEnabled()){
+            log.debug("redisLock keytype is [{}]", redisLock.keytype().name());
         }
 
         switch(redisLock.keytype()){

@@ -18,9 +18,9 @@ public class AccountDepositService {
     }
 
     //@RedisLock(keytype = Control.MANUAL, key = "0001", locktype = Lock.TRYLOCK, waittime = 30000L, leasetime = 30000L)
-    @RedisLock(keytype = Control.KEY, key = "account", locktype = Lock.TRYLOCK_WAITTIME_LEASETIME, waittime = 30000L, leasetime = 30000L)
+    //@RedisLock(keytype = Control.KEY, key = "account", locktype = Lock.TRYLOCK_WAITTIME_LEASETIME, waittime = 30000L, leasetime = 30000L)
     //@RedisLock(keytype = Control.KEY, key = "account", locktype = Lock.TRYLOCK, timeout = 5000L)
-    //@RedisLock(keytype = Control.KEY, key = "account", locktype = Lock.INTERRUPTIBLY)
+    @RedisLock(keytype = Control.KEY, key = "account", locktype = Lock.INTERRUPTIBLY)
     public AccountResponseDto deposit(String account, Long amount){
 
         AccountResponseDto response = new AccountResponseDto();

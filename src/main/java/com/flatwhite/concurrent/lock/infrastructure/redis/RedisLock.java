@@ -17,9 +17,11 @@ public @interface RedisLock {
 
     long waittime() default 0;
 
-    long leasetime() default 0;
+    long leasetime() default DEFAULT_LEASETIME;
 
-    public static long DEFAULT_TIMEOUT     = -1L;
+    public static long DEFAULT_LEASETIME = -1L;
+
+    public static long DEFAULT_TIMEOUT   = -1L;
 
 }
 
