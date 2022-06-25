@@ -28,7 +28,7 @@ public class AccountWithdrawLockController{
     @GetMapping("/locked/{account}/withdraw/{amount}")
     public AccountResponseDto withdraw(@PathVariable String account, @PathVariable String amount) {
 
-        Account accountEntity = accountRepository.getAccount(account);
+        Account accountEntity       = accountRepository.getAccount(account);
         AccountResponseDto response = new AccountResponseDto();
 
 
