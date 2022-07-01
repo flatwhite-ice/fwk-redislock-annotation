@@ -8,11 +8,11 @@
         <version>2.6.7</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.example</groupId>
-    <artifactId>thread-lock</artifactId>
+    <groupId>com.flatwhite</groupId>
+    <artifactId>concurrent-lock</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>thread-lock</name>
-    <description>thread-lock</description>
+    <name>concurrent-lock</name>
+    <description>concurrent lock with redis</description>
     <properties>
         <java.version>11</java.version>
         <org.aspectj-version>1.8.5</org.aspectj-version>
