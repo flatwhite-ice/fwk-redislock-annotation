@@ -14,10 +14,19 @@ updated
 @RedisLock(keytype = Control.KEY, key = "account", locktype = Lock.INTERRUPTIBLY, leasetime = 30000L)
 ```
 
-redislock key controlled by path-variable 
-----------------------------
+
+redislock(key) controlled by path-variable : controller layer
+-------------------------------------------------------------
 
 ```java
+
+@Slf4j
+@RestController
+@RequestMapping("/account")
+public class AccountWithdrawLockController{
+
+    // ...
+
     @RedisLock(keytype = Control.PATH_VARIABLE, key = "account",  locktype = Lock.TRYLOCK_WAITTIME_LEASETIME, waittime = 30000L, leasetime = 30000L)
     @GetMapping("/locked/{account}/withdraw/{amount}")
     public AccountResponseDto withdraw(@PathVariable String account, @PathVariable String amount) {
@@ -35,10 +44,12 @@ redislock key controlled by path-variable
 
         return response;
     }
+
+}
 ```
 
-redislock key controlled by method parameter 
---------------------------------------------
+redislock(key) controlled by method parameter : component layer
+---------------------------------------------------------------
 ```java
 @Service
 public class AccountDepositService {
