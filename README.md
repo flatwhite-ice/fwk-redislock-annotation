@@ -86,11 +86,14 @@ public class AccountDepositService {
 
 annotation manual
 -----------------
-|  item | usage |
-|-------|------|
-|annotation name|@RedisLock|
-|keytype|Control.KEY, Control.PATH_VARIABLE, Control.MANUAL|
-|key|value from pathvariable or method parameter or manually|
-|locktype|Lock.DEFAULT, Lock.TRYLOCK, Lock.TRYLOCK_WAITTIME_LEASETIME, Lock.INTERRUPTIBLY|
-|waittime|long, waiting to acquire|
-|leasetime|long, unlock after lease_time|
+
+|  item | usage | @see |
+|-------|------|------|
+|annotation name|@RedisLock| https://github.com/flatwhite-ice/spring-redislock-annotation/blob/main/src/main/java/com/flatwhite/concurrent/lock/infrastructure/redis/RedisLock.java |
+|keytype|Control.KEY, Control.PATH_VARIABLE, Control.MANUAL| https://github.com/flatwhite-ice/spring-redislock-annotation/blob/main/src/main/java/com/flatwhite/concurrent/lock/infrastructure/redis/Control.java |
+|key|value from pathvariable or method parameter or manually||
+|locktype|Lock.DEFAULT, Lock.TRYLOCK, Lock.TRYLOCK_WAITTIME_LEASETIME, Lock.INTERRUPTIBLY|https://github.com/flatwhite-ice/spring-redislock-annotation/blob/main/src/main/java/com/flatwhite/concurrent/lock/infrastructure/redis/Lock.java|
+|waittime|long, waiting to acquire||
+|leasetime|long, unlock after lease_time||
+
+* aspect : https://github.com/flatwhite-ice/spring-redislock-annotation/blob/main/src/main/java/com/flatwhite/concurrent/lock/infrastructure/redis/RedisLockByAspect.java
