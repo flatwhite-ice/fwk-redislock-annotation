@@ -1,23 +1,85 @@
 # fwk-redislock-annotation
 
 
+@RedisLock annotation usage updated
+===================================
 
-@RedisLock annotation
-
-
-as-is : 
-@RedisLock(type = Lock.KEY, value = "account", action = Type.AS_FAR_AS_POSSIBLE, waittime = 30000L, leasetime = 30000L)
-
-to-be : 
+updated
+-------
+```java
 @RedisLock(keytype = Control.KEY, key = "account", locktype = Lock.DEFAULT)
 @RedisLock(keytype = Control.KEY, key = "account", locktype = Lock.TRYLOCK, timeout = 30000L)
 @RedisLock(keytype = Control.KEY, key = "account", locktype = Lock.TRYLOCK_WAITTIME_LEASETIME, waittime = 30000L, leasetime = 30000L)
 @RedisLock(keytype = Control.KEY, key = "account", locktype = Lock.INTERRUPTIBLY) //leasetime default = -1L
 @RedisLock(keytype = Control.KEY, key = "account", locktype = Lock.INTERRUPTIBLY, leasetime = 30000L)
+```
 
-annotation name : RedisLock
-keytype = Control.KEY, Control.PATH_VARIABLE, Control.PARAMETER
-key = "value"
-locktype = Lock.DEFAULT, Lock.TRYLOCK, Lock.TRYLOCK_WAITTIME_LEASETIME, Lock.INTERRUPTIBLY,
-waittime = 30000L
-leasetime = 30000L
+redislock key controlled by path-variable 
+----------------------------
+
+```java
+    @RedisLock(keytype = Control.PATH_VARIABLE, key = "account",  locktype = Lock.TRYLOCK_WAITTIME_LEASETIME, waittime = 30000L, leasetime = 30000L)
+    @GetMapping("/locked/{account}/withdraw/{amount}")
+    public AccountResponseDto withdraw(@PathVariable String account, @PathVariable String amount) {
+
+        Account accountEntity = accountRepository.getAccount(account);
+        AccountResponseDto response = new AccountResponseDto();
+        accountEntity.setAmount(accountEntity.getAmount() - Long.valueOf(amount));
+
+        // ...
+
+        AccountDto accountDto = accountEntity.convertToDto(accountEntity);
+        response.setData(accountDto);
+        response.setResult("success");
+        response.setMsg("withdraw success, amount " + accountEntity.getAmount());
+
+        return response;
+    }
+```
+
+redislock key controlled by method parameter 
+--------------------------------------------
+```java
+@Service
+public class AccountDepositService {
+
+    private final AccountRepository accountRepository;
+
+    public AccountDepositService(AccountRepository accountRepository){
+        this.accountRepository = accountRepository;
+    }
+
+    @RedisLock(keytype = Control.KEY, key = "account", locktype = Lock.INTERRUPTIBLY)
+    public AccountResponseDto deposit(String account, Long amount){
+
+        AccountResponseDto response = new AccountResponseDto();
+
+        try{
+            // Thread.sleep(7000L);
+            Account accountEnitity = accountRepository.getAccount(account);
+            accountEnitity.setAmount(accountEnitity.getAmount() + amount);
+
+            AccountDto accountDto = accountEnitity.convertToDto(accountEnitity);
+            response.setData(accountDto);
+            response.setResult("success");
+            response.setMsg("deposit success, amount " + accountEnitity.getAmount());
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        return response;
+    }
+
+}
+````
+
+annotation manual
+-----------------
+|  item | usage |
+|-------|------|
+|annotation name|@RedisLock|
+|keytype|Control.KEY, Control.PATH_VARIABLE, Control.MANUAL|
+|key|value from pathvariable or method parameter or manually|
+|locktype|Lock.DEFAULT, Lock.TRYLOCK, Lock.TRYLOCK_WAITTIME_LEASETIME, Lock.INTERRUPTIBLY|
+|waittime|long, waiting to acquire|
+|leasetime|long, unlock after lease_time|
