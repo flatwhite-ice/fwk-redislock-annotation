@@ -4,7 +4,7 @@ public enum Lock{
     //try to acquire lock, wait until wait_time, and unlock after lease_time
     TRYLOCK_WAITTIME_LEASETIME,
 
-    //if fail unlock, occure exception
+    //if fail unlock, occur exception
     DEFAULT,
 
     //lock interruptibly
